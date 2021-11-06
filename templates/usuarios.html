@@ -1,0 +1,258 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="p-4">
+  <a
+    class="btn btn-primary"
+    tabindex="-1"
+    type="button"
+    href="{{url_for("pdf_users")}}"
+  >
+    Reporte Usuarios
+  </a>
+</div>
+
+<table class="table table-light">
+  <thead class="thead-light">
+    <tr>
+      <th>Id</th>
+      <th>Genero</th>
+      <th>Nombre</th>
+      <th>Usuario</th>
+      <th>Correo</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{user['id']}}</td>
+      <td>{{user['gen']}}</td>
+      <td>{{user['name']}}</td>
+      <td>{{user['username']}}</td>
+      <td>{{user['email']}}</td>
+      <td>
+        <div class="btn-group" role="group" aria-label="Button group">
+          <button
+            class="btn-modal btn btn-primary"
+            tabindex="-1"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#update_user_{{user['id']}}"
+          >
+            editar
+          </button>
+          <button class="btn btn-warning" tabindex="-1" type="button" data-bs-toggle="modal"
+          data-bs-target="#see_user_{{user['id']}}">
+            ver
+          </button>
+          <a class="btn btn-danger" tabindex="-1" type="button" href="{{url_for('delete_user', id=user['id'])}}">
+            Eliminar
+          </a>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- MODAL UPDATE USER -->
+{% for user in users %}
+<div
+  class="modal fade"
+  id="update_user_{{user['id']}}"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Editar Usuario</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form
+            method="post"
+            action="{{url_for("update_user", id = user["id"])}}"
+            enctype="multipart/form-data"
+            id="updateUserForm"
+          >
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                placeholder="Nombre"
+                value="{{user['name']}}"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre de Usuario</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="Nombre de Usuario"
+                value="{{user['username']}}"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="Email"
+                value="{{user['email']}}"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Contraseña"
+                value="{{user['password']}}"
+              />
+            </div>
+            <div class="modal-footer d-block">
+              <button type="submit" class="btn btn-warning float-end">
+                Modificar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- MODAL SEE USER -->
+{% for user in users %}
+<div
+  class="modal fade"
+  id="see_user_{{user['id']}}"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{user['name']}}</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="updateUserForm"
+          >
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                placeholder="Nombre"
+                value="{{user['name']}}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Genero</label>
+              <input
+                type="text"
+                class="form-control"
+                id="gen"
+                name="gen"
+                placeholder="Genero"
+                value="{{user['gen']}}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre de Usuario</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="Nombre de Usuario"
+                value="{{user['username']}}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="Email"
+                value="{{user['email']}}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Contraseña"
+                value="{{user['password']}}"
+                disabled
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- SCRIPTS EVENTOS -->
+{% if request.args['delete'] == 'ErrorAdmin' %}
+  <script>
+    window.onload = function () {
+      alert("Imposible eliminar administrador");
+    }
+  </script>
+  {% elif request.args['delete'] == 'Error404' %}
+  <script>
+    window.onload = function(){
+      alert("Usuario no encontrado");
+    }
+  </script>
+  {% elif request.args['delete'] == 'Successful' %}
+  <script>
+    window.onload = function(){
+      alert("Eliminacion Exitosa!!");
+      window.location.replace('{{ session["current_url"] }}');
+    }
+  </script>
+{% endif %}
+
+{% endblock %}
