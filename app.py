@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 from flask_cors import CORS
 from jinja2 import Environment, FileSystemLoader
 
-import os, platform, subprocess
 import pdfkit
 
 from controllers.users import db_users
@@ -15,14 +14,19 @@ CORS(app)
 #secret key
 app.secret_key = 'fDW1QGnZIbmJSEqYrPCk'
 
+#pdf condig
+import os, sys, subprocess, platform
+
+if platform.system() == "Windows":
+        pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
+else:
+        os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
+        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
+            stdout=subprocess.PIPE).communicate()[0].strip()
+        pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
+
 #create default User Admins
 user_controller.createUsuario('Cesar Reyes', 'M', 'admin', 'admin@ipc1', 'admin@ipc1.com', 'ADMIN')
-
-if platform.system() == 'Windows':
-    pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
-else:
-    WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], stdout=subprocess.PIPE).communicate()[0].strip()
-    pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
 
 #region templates
 @app.route('/')
@@ -128,7 +132,7 @@ def pdf_users():
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('usuarios_pdf.html')
     html = template.render(users = user_controller.readUsuarios())
-    pdf = pdfkit.from_string(html, False)
+    pdf = pdfkit.from_string(html, False, {}, configuration=pdfkit_config)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Contetn-Disposition'] = 'attachment; filename=reporte_usuarios.pdf'
