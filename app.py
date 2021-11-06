@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 from flask_cors import CORS
 from jinja2 import Environment, FileSystemLoader
 
+import os, platform, subprocess
 import pdfkit
 
 from controllers.users import db_users
@@ -16,6 +17,12 @@ app.secret_key = 'fDW1QGnZIbmJSEqYrPCk'
 
 #create default User Admins
 user_controller.createUsuario('Cesar Reyes', 'M', 'admin', 'admin@ipc1', 'admin@ipc1.com', 'ADMIN')
+
+if platform.system() == 'Windows':
+    pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
+else:
+    WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], stdout=subprocess.PIPE).communicate()[0].strip()
+    pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
 
 #region templates
 @app.route('/')
