@@ -43,7 +43,9 @@ def users_list():
         return redirect(url_for(session['current_function']))
     session['current_url'] = '/admin/users'
     session['current_function'] = 'users_list'
-    return render_template('usuarios.html', users = user_controller.readUsuarios())
+    users = user_controller.readUsuarios()
+    print(users)
+    return render_template('usuarios.html', users = users)
 #endregion
 
 #region CRUD USERS
