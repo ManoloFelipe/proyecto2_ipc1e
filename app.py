@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, make_response
 from flask_cors import CORS
 from jinja2 import Environment, FileSystemLoader
-from xhtml2pdf import pisa
+from fpdf import FPDF, HTMLMixin
 from controllers.users import db_users
 
 import urllib.request
@@ -121,15 +121,19 @@ def pdf_users():
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('usuarios_pdf.html')
     html = template.render(users = user_controller.readUsuarios())
-    result_file = open('reporte_usuarios.pdf', "w+b")
-    pdf = pisa.CreatePDF(html, dest=result_file)
-    result_file.close()
-    # response = make_response(pdf)
-    # response.headers['Content-Type'] = 'application/pdf'
-    # response.headers['Contetn-Disposition'] = 'attachment; filename=reporte_usuarios.pdf'
-    # return response
-    return redirect(url_for(session['current_function']))
+    pdf = PDF()
+    pdf.add_page()
+    pdf.write_html(html)
+    response = make_response(pdf.output(dest='S'))
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Contetn-Disposition'] = 'attachment; filename=reporte_usuarios.pdf'
+    return response
 
+#endregion
+
+#region pdf class
+class PDF(FPDF, HTMLMixin):
+    pass
 #endregion
 
 #region funciones internas
