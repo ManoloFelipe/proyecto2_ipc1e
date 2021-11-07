@@ -120,6 +120,8 @@ def delete_user(id):
 
 @app.route('/api/pdf_users')
 def pdf_users():
+    if 'user_logged' not in session or session['user_logged']['rol'] != 'ADMIN':
+        return redirect(url_for(session['current_function']))
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('usuarios_pdf.html')
     html = template.render(users = user_controller.readUsuarios())
