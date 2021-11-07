@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, make_response
 from flask_cors import CORS
 from jinja2 import Environment, FileSystemLoader
-
-import pdfkit
-
+from xhtml2pdf import pisa
 from controllers.users import db_users
+
+import urllib.request
 
 #from routes.users import
 user_controller = db_users();
@@ -13,17 +13,6 @@ CORS(app)
 
 #secret key
 app.secret_key = 'fDW1QGnZIbmJSEqYrPCk'
-
-#pdf condig
-import os, sys, subprocess, platform
-
-if platform.system() == "Windows":
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
-else:
-        os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
-        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
-            stdout=subprocess.PIPE).communicate()[0].strip()
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
 
 #create default User Admins
 user_controller.createUsuario('Cesar Reyes', 'M', 'admin', 'admin@ipc1', 'admin@ipc1.com', 'ADMIN')
@@ -132,11 +121,15 @@ def pdf_users():
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('usuarios_pdf.html')
     html = template.render(users = user_controller.readUsuarios())
-    pdf = pdfkit.from_string(html, False, {}, configuration=pdfkit_config)
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Contetn-Disposition'] = 'attachment; filename=reporte_usuarios.pdf'
-    return response
+    result_file = open('reporte_usuarios.pdf', "w+b")
+    pdf = pisa.CreatePDF(html, dest=result_file)
+    result_file.close()
+    # response = make_response(pdf)
+    # response.headers['Content-Type'] = 'application/pdf'
+    # response.headers['Contetn-Disposition'] = 'attachment; filename=reporte_usuarios.pdf'
+    # return response
+    return redirect(url_for(session['current_function']))
+
 #endregion
 
 #region funciones internas
