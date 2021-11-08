@@ -1,0 +1,407 @@
+{% extends "layout.html" %} {% block content %}
+
+{% if posts|length == 0 %}
+<div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border bg-white shadow-lg">
+    <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+        <h1 class="display-4 fw-bold lh-1">Aun no tenemos Publicaciones</h1>
+        <p class="lead">
+            Inicia este viaje 
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
+        <a type="button" class="btn btn-primary btn-lg px-4 me-md-2 fw-bold" data-bs-toggle="modal"
+        data-bs-target="#add_post">Crear Post</a>
+        {% if session['user_logged'] and session['user_logged']['rol'] == 'ADMIN' %}
+        <br>
+        <a type="button" class="btn btn-warning btn-lg px-4 me-md-2 fw-bold" data-bs-toggle="modal"
+        data-bs-target="#carga_masiva">Carga Masiva</a>
+        {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4 offset-lg-1 p-0 overflow-hidden contain">
+        <img class="rounded-lg-3 mw-100 mh-100" src="{{url_for('static', filename='logo_texto.png')}}" alt="" width="auto">
+    </div>
+    <div class="p-4"></div>
+</div>
+{% else %}
+
+<h1 class="display-1" style="color:white;">Publicaciones Recientes</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    
+    {% for post in posts %}
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        {% if post['type'] == 'image' %}
+        <img src="{{post['url']}}" class="card-img-top" alt="...">
+        {% else %}
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item mw-100 mh-100" src="{{post['url']}}"></iframe>
+        </div>
+        {% endif %}
+        <div class="card-body">
+            <!-- <h5 class="card-title">{{post['text']}}</h5> -->
+            <p class="card-text">{{post['text']}}</p>
+            
+            {% if session['user_logged'] is defined and not post['likes'][session['user_logged']['id']] %}
+         <a href="{{url_for("like_post", id=post['id'])}}" class="btn btn-primary" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% else %}
+                <a href="{{url_for("dislike_post", id=post['id'])}}" class="btn btn-danger" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% endif %}
+                <button class="btn btn-info" disabled index='-1'>
+                    {{post['likes']|length}}
+                </button>
+              {% if session['user_logged'] is defined and (post['autor'] == session['user_logged']['name'] or session['user_logged']['rol'] == 'ADMIN') %}
+              <br>
+              <br>
+              <div class="btn-group">
+                  <a href="#" class="btn btn-warning" data-bs-toggle="modal"
+                  data-bs-target="#update_post_{{post['id']}}">Editar</a>
+                  <a href="{{url_for("delete_post", id=post['id'])}}" class="btn btn-danger">Elimar</a>
+                </div>
+              {% endif %}
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">autor: {{post['author']}}</small>
+            <br>
+            <small class="text-muted">categoria: {{post['category']}}</small>
+            <br>
+            <small class="text-muted">{{post['date']}}</small>
+        </div>
+    </div>
+</div>
+    {% endfor %}
+</div>
+
+{% if my_posts|length !=0 %}
+<h1 class="display-1" style="color:white;">Mis Publicaciones</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    
+    {% for post in my_posts %}
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        {% if post['type'] == 'image' %}
+        <img src="{{post['url']}}" class="card-img-top" alt="...">
+        {% else %}
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item mw-100 mh-100" src="{{post['url']}}"></iframe>
+        </div>
+        {% endif %}
+        <div class="card-body">
+            <!-- <h5 class="card-title">{{post['text']}}</h5> -->
+            <p class="card-text">{{post['text']}}</p>
+            
+            {% if session['user_logged'] is defined and not post['likes'][session['user_logged']['id']] %}
+         <a href="{{url_for("like_post", id=post['id'])}}" class="btn btn-primary" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% else %}
+                <a href="{{url_for("dislike_post", id=post['id'])}}" class="btn btn-danger" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% endif %}
+                <button class="btn btn-info" disabled index='-1'>
+                    {{post['likes']|length}}
+                </button>
+              {% if session['user_logged'] is defined and (post['autor'] == session['user_logged']['name'] or session['user_logged']['rol'] == 'ADMIN') %}
+              <br>
+              <br>
+              <div class="btn-group">
+                  <a href="#" class="btn btn-warning" data-bs-toggle="modal"
+                  data-bs-target="#update_post_{{post['id']}}">Editar</a>
+                  <a href="{{url_for("delete_post", id=post['id'])}}" class="btn btn-danger">Elimar</a>
+                </div>
+              {% endif %}
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">autor: {{post['author']}}</small>
+            <br>
+            <small class="text-muted">categoria: {{post['category']}}</small>
+            <br>
+            <small class="text-muted">{{post['date']}}</small>
+        </div>
+    </div>
+</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if top5|length !=0 %}
+<h1 class="display-1" style="color:white;">Top 5 mas likes</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    
+    {% for post in top5 %}
+    <div class="col">
+    <div class="card" style="width: 18rem;">
+        {% if post['type'] == 'image' %}
+        <img src="{{post['url']}}" class="card-img-top" alt="...">
+        {% else %}
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item mw-100 mh-100" src="{{post['url']}}"></iframe>
+        </div>
+        {% endif %}
+        <div class="card-body">
+            <!-- <h5 class="card-title">{{post['text']}}</h5> -->
+            <p class="card-text">{{post['text']}}</p>
+            
+            {% if session['user_logged'] is defined and not post['likes'][session['user_logged']['id']] %}
+         <a href="{{url_for("like_post", id=post['id'])}}" class="btn btn-primary" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% else %}
+                <a href="{{url_for("dislike_post", id=post['id'])}}" class="btn btn-danger" index="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart-fill" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg></a>
+                {% endif %}
+                <button class="btn btn-info" disabled index='-1'>
+                    {{post['likes']|length}}
+                </button>
+              {% if session['user_logged'] is defined and (post['autor'] == session['user_logged']['name'] or session['user_logged']['rol'] == 'ADMIN') %}
+              <br>
+              <br>
+              <div class="btn-group">
+                  <a href="#" class="btn btn-warning" data-bs-toggle="modal"
+                  data-bs-target="#update_post_{{post['id']}}">Editar</a>
+                  <a href="{{url_for("delete_post", id=post['id'])}}" class="btn btn-danger">Elimar</a>
+                </div>
+              {% endif %}
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">autor: {{post['author']}}</small>
+            <br>
+            <small class="text-muted">categoria: {{post['category']}}</small>
+            <br>
+            <small class="text-muted">{{post['date']}}</small>
+        </div>
+    </div>
+</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if session['user_logged'] and session['user_logged']['rol'] == 'ADMIN' %}
+<div class="btn-group" role="group" aria-label="Button group">
+    <button
+        type="button"
+        class="btn btn-warning btn-floating btn-lg"
+        id="btn_new_post"
+        tabindex="-1"
+        data-bs-toggle="modal"
+        data-bs-target="#carga_masiva"
+        style="position: fixed;
+        bottom: 20px;
+        right: 80px;
+        ">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
+    <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
+    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+  </svg>
+</button>
+
+    <button
+            type="button"
+            class="btn btn-primary btn-floating btn-lg"
+            id="btn_new_post"
+            tabindex="-1"
+            data-bs-toggle="modal"
+            data-bs-target="#add_post"
+            style="position: fixed;
+            bottom: 20px;
+            right: 20px;
+            ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
+        <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
+        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+      </svg>
+    </button>
+</div>
+{% endif %}
+{% endif %}
+
+    <!-- MODAL ADD POST -->
+    <div
+      class="modal fade"
+      id="add_post"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Nueva Publicación</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="{{url_for("add_post")}}" enctype="multipart/form-data" id="addForm"> 
+            <div class="mb-3">
+              <label class="form-label">Tipo de publicación</label>
+              <select class="form-select" id="type" name="type" form="addForm">
+                <option value="image" selected>Imagen</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Texto a mostrar</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="text"
+                  name="text"
+                  placeholder="Texto"
+                />
+              </div>
+            <div class="mb-3">
+              <label class="form-label">Url del archivo</label>
+              <input
+                type="text"
+                class="form-control"
+                id="url"
+                name="url"
+                placeholder="Url"
+              />
+            </div>
+              <div class="mb-3">
+                <label class="form-label">Categoria</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="category"
+                  name="category"
+                  placeholder="Categoria de la publicación"
+                />
+              </div>
+              <div class="modal-footer d-block">
+                <button type="submit" class="btn btn-warning float-end">
+                  Publicar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if posts|length > 0 %}
+    {% for post in posts %}
+    <!-- MODAL UPDATE POST -->
+    <div
+      class="modal fade"
+      id="update_post_{{post['id']}}"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Editar Publicación</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="{{url_for("add_post")}}" enctype="multipart/form-data" id="addForm"> 
+            <div class="mb-3">
+              <label class="form-label">Tipo de publicación</label>
+              <select class="form-select" id="type" name="type" form="addForm" value="{{post['type']}}">
+                <option value="image">Imagen</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Texto a mostrar</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="text"
+                  name="text"
+                  placeholder="Texto"
+                  value="{{post['text']}}"
+                />
+              </div>
+            <div class="mb-3">
+              <label class="form-label">Url del archivo</label>
+              <input
+                type="text"
+                class="form-control"
+                id="url"
+                name="url"
+                placeholder="Url"
+                value="{{post['url']}}"
+              />
+            </div>
+              <div class="mb-3">
+                <label class="form-label">Categoria</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="category"
+                  name="category"
+                  placeholder="Categoria de la publicación"
+                  value="{{post['category']}}"
+                />
+              </div>
+              <div class="modal-footer d-block">
+                <button type="submit" class="btn btn-warning float-end">
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- MODAL CARGA MASIVA POST -->
+    <div
+      class="modal fade"
+      id="carga_masiva"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Nuevas Publicaciones</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="{{url_for("carga_masiva_post")}}" enctype="multipart/form-data" id="addForm"> 
+            <div class="mb-3">
+                <input type="file" class="form-control" name="file" accept="application/JSON">
+              </div>
+            
+              <div class="modal-footer d-block">
+                <button type="submit" class="btn btn-warning float-end">
+                  Ingresar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

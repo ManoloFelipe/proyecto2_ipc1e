@@ -9,6 +9,20 @@
   >
     Reporte Usuarios
   </a>
+  <p></p>
+  <form action="{{url_for('carga_masiva_users')}}" method="post" enctype="multipart/form-data"> 
+      <div class="input-group mb-3">
+      <button
+      class="btn btn-warning"
+      tabindex="-1"
+      type="submit"
+    >
+      Carga masiva de usuarios
+    </button>
+    <input type="file" class="form-control" name="file" accept="application/JSON">
+  </div>
+    </form>
+  
 </div>
 
 <table class="table table-light">

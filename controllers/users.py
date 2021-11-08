@@ -78,7 +78,7 @@ class db_users:
         for usuario_cm in usuarios_cm:
             self.createUsuario(
                 usuario_cm['name'],
-                usuario_cm['gen'],
+                usuario_cm['gender'],
                 usuario_cm['username'],
                 usuario_cm['password'],
                 usuario_cm['email'],
